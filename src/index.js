@@ -22,7 +22,7 @@ function areArgumentsShallowlyEqual(equalityCheck, prev, next) {
   return true
 }
 
-export function defaultMemoize(func, equalityCheck = defaultEqualityCheck) {
+export function defaultMemoize(func, equalityCheck = defaultEqualityCheck, profiler) {
   let lastArgs = null
   let lastResult = null
 
@@ -30,7 +30,11 @@ export function defaultMemoize(func, equalityCheck = defaultEqualityCheck) {
   return function () {
     if (!areArgumentsShallowlyEqual(equalityCheck, lastArgs, arguments)) {
       // apply arguments instead of spreading for performance.
-      lastResult = func.apply(null, arguments)
+      const nextResult = func.apply(null, arguments)
+      if (profiler) {
+        profiler(nextResult, lastResult, arguments, lastArgs)
+      }
+      lastResult = nextResult
     }
 
     lastArgs = arguments
